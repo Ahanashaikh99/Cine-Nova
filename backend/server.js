@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
     status: "online",
     endpoints: {
       health: "/api/health",
-      search: "/api/search?query=avatar&type=multi&page=1",
+      search: "/api/search?query=avatar&page=1",
     },
   });
 });
@@ -44,5 +44,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Use PORT from .env or default to 5001 (port 5000 is reserved by macOS AirPlay)
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
