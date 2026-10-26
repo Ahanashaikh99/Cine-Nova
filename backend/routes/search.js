@@ -3,6 +3,39 @@ const tmdb = require('../tmdbClient');
 
 const TMDB_IMAGE_BASE_W500 = 'https://image.tmdb.org/t/p/w500';
 
+// Fallback sample movies when running locally without a TMDB_API_KEY
+function getLocalFallbackMovies(query, page) {
+  return {
+    page: Number(page) || 1,
+    total_pages: 3,
+    total_results: 24,
+    results: [
+      {
+        id: 550,
+        title: `${query} (Local Demo Movie 1)`,
+        overview: `A cinematic adventure exploring the world of ${query}. Features award-winning visual effects and storytelling.`,
+        poster_path: '/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg',
+        poster_url: 'https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg',
+        release_date: '2023-07-21',
+        vote_average: 8.6,
+        vote_count: 3420,
+        genre_ids: [28, 12, 878],
+      },
+      {
+        id: 551,
+        title: `${query} 2: Resurrection`,
+        overview: `The highly anticipated sequel revolving around ${query}. Explores uncharted territories with returning fan-favorite characters.`,
+        poster_path: '/8UlWqwvg5gvD2frQ2Q04LO20RBC.jpg',
+        poster_url: 'https://image.tmdb.org/t/p/w500/8UlWqwvg5gvD2frQ2Q04LO20RBC.jpg',
+        release_date: '2024-03-01',
+        vote_average: 7.9,
+        vote_count: 890,
+        genre_ids: [18, 53],
+      },
+    ],
+  };
+}
+
 /**
  * Creates the search router.
  * Accepts an optional client parameter for dependency injection in automated tests.
@@ -60,12 +93,28 @@ function createSearchRouter(client = tmdb) {
         }
       }
 
-      // 4. Call Arthur's TMDb client (handles caching + upstream API)
-      const data = await client.searchMovies(query.trim(), {
-        page: pageNum,
-        year: parsedYear,
-        language,
-      });
+      // 4. Call Arthur's TMDb client
+      let data;
+      try {
+        data = await client.searchMovies(query.trim(), {
+          page: pageNum,
+          year: parsedYear,
+          language,
+        });
+      } catch (err) {
+        // If server credentials are missing in local dev (.env not yet filled), provide clean demo data
+        if (err.code === 'MISSING_CREDENTIALS') {
+          console.warn('[Search] No TMDB credentials in .env - serving local demonstration data.');
+          const fallback = getLocalFallbackMovies(query.trim(), pageNum);
+          return res.status(200).json({
+            success: true,
+            demo_mode: true,
+            notice: 'Live TMDB API requires TMDB_API_KEY in .env. Serving local mock data.',
+            ...fallback,
+          });
+        }
+        throw err;
+      }
 
       // 5. Clean up & normalize response data (add CDN poster URLs)
       const results = (data.results || []).map((movie) => ({
