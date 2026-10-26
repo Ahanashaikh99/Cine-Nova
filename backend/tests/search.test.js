@@ -1,85 +1,140 @@
-const assert = require('assert');
+const test = require('node:test');
+const assert = require('node:assert/strict');
 const express = require('express');
-const searchRouter = require('../routes/search');
+const { createTmdbClient } = require('../tmdbClient');
+const { createSearchRouter } = require('../routes/search');
 
-// Create test express app
-const app = express();
-app.use(express.json());
-app.use('/api/search', searchRouter);
+// Sample movie data fixture
+const sampleMovie = {
+  id: 101,
+  title: 'Inception',
+  poster_path: '/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg',
+  release_date: '2010-07-16',
+  vote_average: 8.4,
+  vote_count: 35000,
+  genre_ids: [28, 878, 12],
+  overview: 'A thief who steals corporate secrets through dream-sharing technology.',
+};
 
-async function runTests() {
-  console.log('--- Running Cine-Nova Task 4 Search Tests ---');
+function setupTestApp(customHandler) {
+  let fetchCount = 0;
+  const mockFetch = async (url, init) => {
+    fetchCount++;
+    if (customHandler) return customHandler(url, init);
+    const body = {
+      page: 1,
+      total_pages: 5,
+      total_results: 50,
+      results: [sampleMovie],
+    };
+    return new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  };
 
+  const client = createTmdbClient({
+    token: 'test-token-12345',
+    fetchImpl: mockFetch,
+  });
+
+  const app = express();
+  app.use(express.json());
+  app.use('/api/search', createSearchRouter(client));
+
+  return { app, getFetchCount: () => fetchCount };
+}
+
+test('Task 4 Search: Query validation rejects empty query with 400', async () => {
+  const { app } = setupTestApp();
   const server = app.listen(0);
   const port = server.address().port;
-  const baseUrl = `http://localhost:${port}/api/search`;
 
   try {
-    // Test 1: Missing / empty query should return 400
-    {
-      const res = await fetch(`${baseUrl}?query=`);
-      assert.strictEqual(res.status, 400, 'Empty query should return status 400');
-      const body = await res.json();
-      assert.strictEqual(body.success, false);
-      assert.ok(body.error.includes('required'));
-      console.log('✅ Test 1 Passed: Empty query validation rejected with 400');
-    }
-
-    // Test 2: Invalid type should return 400
-    {
-      const res = await fetch(`${baseUrl}?query=Avatar&type=invalid_type`);
-      assert.strictEqual(res.status, 400, 'Invalid type should return status 400');
-      const body = await res.json();
-      assert.strictEqual(body.success, false);
-      assert.ok(body.error.includes('Invalid'));
-      console.log('✅ Test 2 Passed: Invalid type rejected with 400');
-    }
-
-    // Test 3: Invalid page should return 400
-    {
-      const res = await fetch(`${baseUrl}?query=Avatar&page=0`);
-      assert.strictEqual(res.status, 400, 'Page 0 should return status 400');
-      const body = await res.json();
-      assert.strictEqual(body.success, false);
-      assert.ok(body.error.includes('positive integer'));
-      console.log('✅ Test 3 Passed: Invalid page rejected with 400');
-    }
-
-    // Test 4: Valid search should return 200 and normalized fields
-    {
-      const res = await fetch(`${baseUrl}?query=Inception&type=movie&page=1`);
-      assert.strictEqual(res.status, 200, 'Valid search should return status 200');
-      const body = await res.json();
-      assert.strictEqual(body.success, true);
-      assert.strictEqual(body.meta.query, 'Inception');
-      assert.strictEqual(body.meta.type, 'movie');
-      assert.strictEqual(body.meta.page, 1);
-      assert.ok(Array.isArray(body.results));
-      assert.ok(body.results.length > 0);
-
-      const first = body.results[0];
-      assert.ok(first.id, 'Result must have id');
-      assert.ok(first.title, 'Result must have normalized title');
-      assert.ok(first.poster_url === null || first.poster_url.startsWith('https://image.tmdb.org'), 'Poster URL must point to CDN');
-      assert.ok(typeof first.vote_average === 'number' || first.vote_average === null);
-      console.log('✅ Test 4 Passed: Valid search returned 200 with sanitized data');
-    }
-
-    // Test 5: Caching check
-    {
-      const resCached = await fetch(`${baseUrl}?query=Inception&type=movie&page=1`);
-      const bodyCached = await resCached.json();
-      assert.strictEqual(bodyCached.meta.cached, true, 'Second search should hit cache');
-      console.log('✅ Test 5 Passed: Caching verified (second identical query returned cached=true)');
-    }
-
-    console.log('\n🎉 ALL 5 TESTS PASSED SUCCESSFULLY! Task 4 is working perfectly.');
+    const res = await fetch(`http://127.0.0.1:${port}/api/search?query=`);
+    assert.equal(res.status, 400);
+    const body = await res.json();
+    assert.equal(body.success, false);
+    assert.match(body.error, /required/);
   } finally {
     server.close();
   }
-}
+});
 
-runTests().catch((err) => {
-  console.error('❌ Test failed:', err);
-  process.exit(1);
+test('Task 4 Search: Page validation rejects non-integers and out-of-range pages with 400', async () => {
+  const { app } = setupTestApp();
+  const server = app.listen(0);
+  const port = server.address().port;
+
+  try {
+    const res1 = await fetch(`http://127.0.0.1:${port}/api/search?query=Inception&page=0`);
+    assert.equal(res1.status, 400);
+
+    const res2 = await fetch(`http://127.0.0.1:${port}/api/search?query=Inception&page=abc`);
+    assert.equal(res2.status, 400);
+  } finally {
+    server.close();
+  }
+});
+
+test('Task 4 Search: Year validation rejects invalid years with 400', async () => {
+  const { app } = setupTestApp();
+  const server = app.listen(0);
+  const port = server.address().port;
+
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/search?query=Inception&year=999`);
+    assert.equal(res.status, 400);
+  } finally {
+    server.close();
+  }
+});
+
+test('Task 4 Search: Valid query integrates Arthur tmdbClient and formats CDN URLs', async () => {
+  const { app } = setupTestApp();
+  const server = app.listen(0);
+  const port = server.address().port;
+
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/search?query=Inception&page=1`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+
+    assert.equal(body.success, true);
+    assert.equal(body.page, 1);
+    assert.equal(body.total_pages, 5);
+    assert.equal(body.total_results, 50);
+    assert.equal(body.results.length, 1);
+
+    const first = body.results[0];
+    assert.equal(first.id, 101);
+    assert.equal(first.title, 'Inception');
+    assert.equal(
+      first.poster_url,
+      'https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg'
+    );
+    assert.equal(first.release_date, '2010-07-16');
+  } finally {
+    server.close();
+  }
+});
+
+test('Task 4 Search: Verifies caching layer through Arthur client', async () => {
+  const { app, getFetchCount } = setupTestApp();
+  const server = app.listen(0);
+  const port = server.address().port;
+
+  try {
+    // 1st call
+    const res1 = await fetch(`http://127.0.0.1:${port}/api/search?query=Avatar&page=1`);
+    assert.equal(res1.status, 200);
+    assert.equal(getFetchCount(), 1, 'First search must fetch from upstream');
+
+    // 2nd call (identical) - should be served from Arthur's cache!
+    const res2 = await fetch(`http://127.0.0.1:${port}/api/search?query=Avatar&page=1`);
+    assert.equal(res2.status, 200);
+    assert.equal(getFetchCount(), 1, 'Second search must be served from cache without upstream fetch');
+  } finally {
+    server.close();
+  }
 });
