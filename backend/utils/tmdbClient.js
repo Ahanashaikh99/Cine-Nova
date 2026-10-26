@@ -1,13 +1,25 @@
+const path = require('path');
+const fs = require('fs');
 const NodeCache = require('node-cache');
 
 // In-memory cache: 5 minutes TTL (300 seconds), check for expired keys every 60 seconds
 const cache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
-
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+
+// Check if Arthur's root tmdbClient.js is present
+const arthurClientPath = path.resolve(__dirname, '../tmdbClient.js');
+let arthurClient = null;
+if (fs.existsSync(arthurClientPath)) {
+  try {
+    arthurClient = require(arthurClientPath);
+  } catch (err) {
+    // Falls back gracefully if credentials aren't set yet
+  }
+}
 
 /**
  * TMDb Client module
- * Handles outbound requests to TMDb with in-memory caching and mock fallback.
+ * Bridges with Arthur's tmdbClient if available, or provides native fetching + mock fallback.
  */
 const tmdbClient = {
   /**
@@ -19,6 +31,17 @@ const tmdbClient = {
    * @returns {Promise<Object>} TMDb response object
    */
   async search({ query, type = 'multi', page = 1 }) {
+    // If Arthur's client is merged and it's a movie search, delegate to Arthur's searchMovies
+    if (arthurClient && typeof arthurClient.searchMovies === 'function' && type === 'movie') {
+      try {
+        const arthurResult = await arthurClient.searchMovies(query, { page });
+        return { ...arthurResult, _cached: false, _source: 'arthur_client' };
+      } catch (err) {
+        // If Arthur's client throws (e.g. missing API token), fall through to internal handler
+        console.warn('[tmdbClient] Arthur client fallback:', err.message);
+      }
+    }
+
     const cacheKey = `search:${type}:${query.toLowerCase().trim()}:${page}`;
     const cachedData = cache.get(cacheKey);
 
@@ -26,9 +49,9 @@ const tmdbClient = {
       return { ...cachedData, _cached: true };
     }
 
-    const apiKey = process.env.TMDB_API_KEY;
+    const apiKey = process.env.TMDB_API_KEY || process.env.TMDB_TOKEN || process.env.TMDB_READ_ACCESS_TOKEN;
 
-    // If real API key is present, call TMDb API
+    // If real API key is present, call live TMDb API
     if (apiKey && apiKey !== 'your_key_here') {
       const endpoint = type === 'multi' ? 'multi' : type;
       const url = new URL(`${TMDB_BASE_URL}/search/${endpoint}`);
@@ -53,7 +76,7 @@ const tmdbClient = {
       return { ...data, _cached: false };
     }
 
-    // Fallback Mock Data if no API key is provided yet
+    // High-fidelity fallback mock data when running locally without active API key
     const mockData = {
       page: Number(page),
       total_pages: 3,
@@ -102,16 +125,10 @@ const tmdbClient = {
     return { ...mockData, _cached: false };
   },
 
-  /**
-   * Helper to inspect cache stats for presentations/debugging
-   */
   getCacheStats() {
     return cache.getStats();
   },
 
-  /**
-   * Clear cache if needed
-   */
   flushCache() {
     return cache.flushAll();
   },
