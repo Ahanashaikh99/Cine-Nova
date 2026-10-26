@@ -14,6 +14,8 @@ function notFound(req, res) {
 function errorHandler(err, req, res, next) {
   const status = err.status || 500;
   if (status >= 500) console.error(err);
+  // tmdbClient (TmdbError) sets `retryAfter` when TMDb answers 429 (too many requests)
+  if (err.retryAfter !== undefined) res.set('Retry-After', String(err.retryAfter));
   res.status(status).json({ error: err.message || 'Internal Server Error' });
 }
 

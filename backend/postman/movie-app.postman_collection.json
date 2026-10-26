@@ -1,26 +1,21 @@
 {
   "info": {
     "name": "Movie App Backend (TMDb)",
-    "description": "Before running, select the environment 'Movie App - Local (Docker)' or update the Collection's baseUrl variable to match your URL.",
+    "description": "Filters demo (movie only). Start the server first (docker compose up --build, http://localhost:5001). If you use another port, replace 5001 in the request URLs.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:5001",
-      "type": "default"
-    }
-  ],
   "item": [
     {
       "name": "Health check",
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/health",
+          "raw": "http://localhost:5001/api/health",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "health"
@@ -33,10 +28,12 @@
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/genres",
+          "raw": "http://localhost:5001/api/genres",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "genres"
@@ -51,23 +48,19 @@
       }
     },
     {
-      "name": "Genres - tv",
+      "name": "Discover - default (popular movies)",
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/genres",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
-            "genres"
-          ],
-          "query": [
-            {
-              "key": "type",
-              "value": "tv"
-            }
+            "discover"
           ]
         }
       }
@@ -77,10 +70,12 @@
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/discover",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "discover"
@@ -107,30 +102,16 @@
       }
     },
     {
-      "name": "Discover - default (popular movies)",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/discover",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "discover"
-          ]
-        }
-      }
-    },
-    {
       "name": "Discover - genre (Action AND Adventure)",
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/discover",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "discover"
@@ -149,10 +130,12 @@
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/discover",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "discover"
@@ -171,10 +154,12 @@
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/discover",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "discover"
@@ -193,10 +178,12 @@
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/discover",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "discover"
@@ -219,27 +206,21 @@
       }
     },
     {
-      "name": "Discover - date range, newest first",
+      "name": "Discover - newest first",
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/discover",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "discover"
           ],
           "query": [
-            {
-              "key": "date_from",
-              "value": "2020-01-01"
-            },
-            {
-              "key": "date_to",
-              "value": "2022-12-31"
-            },
             {
               "key": "sort",
               "value": "release_date"
@@ -253,14 +234,40 @@
       }
     },
     {
+      "name": "Discover - page 2",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
       "name": "Discover - combined filters (movie)",
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/discover",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "discover"
@@ -299,44 +306,16 @@
       }
     },
     {
-      "name": "Discover - TV shows",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/discover",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "discover"
-          ],
-          "query": [
-            {
-              "key": "type",
-              "value": "tv"
-            },
-            {
-              "key": "genre",
-              "value": "18"
-            },
-            {
-              "key": "min_rating",
-              "value": "8"
-            }
-          ]
-        }
-      }
-    },
-    {
       "name": "ERROR - invalid sort (expect 400)",
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/discover",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "discover"
@@ -355,10 +334,12 @@
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/discover",
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "discover"
@@ -373,14 +354,40 @@
       }
     },
     {
+      "name": "ERROR - tv not supported yet (expect 400)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "tv"
+            }
+          ]
+        }
+      }
+    },
+    {
       "name": "ERROR - unknown route (expect 404)",
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{baseUrl}}/api/unknown",
+          "raw": "http://localhost:5001/api/unknown",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "5001",
           "path": [
             "api",
             "unknown"
