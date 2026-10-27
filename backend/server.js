@@ -1,10 +1,17 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+
+// Firebase Database (Simran - Task 3)
 const { db } = require("./config/firebase");
 
 // Routes
-const searchRouter = require("./routes/search");
+const searchRouter = require("./routes/search");      // Vritika (Task 4)
+const discoverRouter = require("./routes/discover");  // Suzuki (Task 4/5)
+const genresRouter = require("./routes/genres");      // Suzuki (Task 4/5)
+
+// Error Handlers (Suzuki)
+const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
 app.use(cors());
@@ -18,6 +25,8 @@ app.get("/", (req, res) => {
     endpoints: {
       health: "/api/health",
       search: "/api/search?query=avatar&page=1",
+      discover: "/api/discover?genre=28&year=2023",
+      genres: "/api/genres",
     },
   });
 });
@@ -32,18 +41,20 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// Mount search route (Task 4 - Vritika)
+// Mount all feature routes
 app.use("/api/search", searchRouter);
+app.use("/api/discover", discoverRouter);
+app.use("/api/genres", genresRouter);
 
-// Central error-handling middleware
-app.use((err, req, res, next) => {
-  console.error("Server error:", err);
-  res.status(err.status || 500).json({
-    success: false,
-    error: err.message || "Internal Server Error",
-  });
-});
+// 404 & Central Error Handling Middleware
+app.use(notFound);
+app.use(errorHandler);
 
-// Use PORT from .env or default to 5001 (port 5000 is reserved by macOS AirPlay)
+// Port setup (default to 5001 to avoid macOS AirPlay port 5000 collision)
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Cine-Nova server running on http://localhost:${PORT}`));
+}
+
+module.exports = app;

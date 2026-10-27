@@ -1,0 +1,399 @@
+{
+  "info": {
+    "name": "Movie App Backend (TMDb)",
+    "description": "Filters demo (movie only). Start the server first (docker compose up --build, http://localhost:5001). If you use another port, replace 5001 in the request URLs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Genres - movie",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/genres",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "genres"
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "movie"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Discover - default (popular movies)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Discover - slide example (genre+year+rating+sort)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "genre",
+              "value": "28"
+            },
+            {
+              "key": "year",
+              "value": "2023"
+            },
+            {
+              "key": "min_rating",
+              "value": "7"
+            },
+            {
+              "key": "sort",
+              "value": "popularity"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Discover - genre (Action AND Adventure)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "genre",
+              "value": "28,12"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Discover - genre (Action OR Comedy)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "genre",
+              "value": "28|35"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Discover - year",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "year",
+              "value": "2023"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Discover - rating 8+ sorted by rating",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "min_rating",
+              "value": "8"
+            },
+            {
+              "key": "sort",
+              "value": "vote_average"
+            },
+            {
+              "key": "order",
+              "value": "desc"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Discover - newest first",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "sort",
+              "value": "release_date"
+            },
+            {
+              "key": "order",
+              "value": "desc"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Discover - page 2",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Discover - combined filters (movie)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "movie"
+            },
+            {
+              "key": "genre",
+              "value": "878"
+            },
+            {
+              "key": "year",
+              "value": "2022"
+            },
+            {
+              "key": "min_rating",
+              "value": "7"
+            },
+            {
+              "key": "sort",
+              "value": "popularity"
+            },
+            {
+              "key": "order",
+              "value": "desc"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "ERROR - invalid sort (expect 400)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "sort",
+              "value": "hacked"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "ERROR - rating out of range (expect 400)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "min_rating",
+              "value": "11"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "ERROR - tv not supported yet (expect 400)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/discover",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "discover"
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "tv"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "ERROR - unknown route (expect 404)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5001/api/unknown",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "unknown"
+          ]
+        }
+      }
+    }
+  ]
+}
